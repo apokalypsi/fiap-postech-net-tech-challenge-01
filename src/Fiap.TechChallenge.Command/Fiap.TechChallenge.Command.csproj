@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Fiap.TechChallenge.Contract\Fiap.TechChallenge.Contract.csproj"/>
+        <ProjectReference Include="..\Fiap.TechChallenge.Foundation.Core\Fiap.TechChallenge.Foundation.Core.csproj"/>
+        <ProjectReference Include="..\Fiap.TechChallenge\Fiap.TechChallenge.csproj"/>
+    </ItemGroup>
+
+</Project>
