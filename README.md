@@ -3,6 +3,7 @@
 Este projeto faz parte do Tech Challenge da Fase 01, cujo objetivo é desenvolver um aplicativo utilizando a plataforma **.NET 8** para o cadastro de contatos regionais, considerando a persistência de dados, qualidade do código e boas práticas de desenvolvimento.
 
 URL: https://youtu.be/ef8RhF49smw
+Git: https://github.com/apokalypsi/fiap-postech-net-tech-challenge-01
 
 Equipe:
 
