@@ -86,6 +86,7 @@ Cada camada tem sua responsabilidade bem definida e não compartilham modelos ou
 - **Entity Framework Core**: Utilizado para a persistência dos dados.
 - **FluentValidation**: Implementação das validações para garantir a consistência dos dados.
 - **xUnit**: Ferramenta utilizada para os testes unitários.
+- **Base**: Ferramenta utilizad https://aiven.io/free-mysql-database
 
 ## Executando o Projeto
 

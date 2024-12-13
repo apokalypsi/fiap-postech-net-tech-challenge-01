@@ -10,4 +10,8 @@
         <ProjectReference Include="..\Fiap.TechChallenge\Fiap.TechChallenge.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Fiap.TechChallenge.Foundation.Core" Version="1.0.0" />
+    </ItemGroup>
+
 </Project>

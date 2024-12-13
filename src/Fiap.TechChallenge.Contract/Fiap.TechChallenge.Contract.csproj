@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Fiap.TechChallenge.Foundation.Core\Fiap.TechChallenge.Foundation.Core.csproj"/>
         <ProjectReference Include="..\Fiap.TechChallenge.Language\Fiap.TechChallenge.Language.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Fiap.TechChallenge.Foundation.Core" Version="1.0.0" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>
     </ItemGroup>
 

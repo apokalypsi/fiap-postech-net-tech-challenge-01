@@ -8,8 +8,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Fiap.TechChallenge.Contract\Fiap.TechChallenge.Contract.csproj"/>
-        <ProjectReference Include="..\Fiap.TechChallenge.Foundation.Core\Fiap.TechChallenge.Foundation.Core.csproj"/>
         <ProjectReference Include="..\Fiap.TechChallenge\Fiap.TechChallenge.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fiap.TechChallenge.Foundation.Core" Version="1.0.0" />
     </ItemGroup>
 
 </Project>
