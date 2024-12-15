@@ -23,16 +23,16 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies for solution
-      run: dotnet restore fiap-postech-net-tech-challenge-01/src/Fiap.TechChallenge.sln
+      run: dotnet restore src/Fiap.TechChallenge.sln
 
     - name: Build entire solution
-      run: dotnet build Fiap.TechChallenge.sln --configuration Release --no-restore
+      run: dotnet build src/Fiap.TechChallenge.sln --configuration Release --no-restore
 
     - name: Run tests
-      run: dotnet test fiap-postech-net-tech-challenge-01/src/Fiap.TechChallenge.sln --configuration Release --no-build --verbosity normal
+      run: dotnet test src/Fiap.TechChallenge.sln --configuration Release --no-build --verbosity normal
 
     - name: Publish API project
-      run: dotnet publish fiap-postech-net-tech-challenge-01/src/Fiap.TechChallenge.Api --configuration Release --output ./artifacts
+      run: dotnet publish src/Fiap.TechChallenge.Api --configuration Release --output ./artifacts
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
