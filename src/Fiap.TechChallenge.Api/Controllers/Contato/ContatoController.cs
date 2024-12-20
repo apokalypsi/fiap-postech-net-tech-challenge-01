@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using Fiap.TechChallenge.Command.v1.Contato;
 using Fiap.TechChallenge.Contract.v1.Contato.AtualizarContato;
 using Fiap.TechChallenge.Contract.v1.Contato.CriarContato;
@@ -8,6 +9,7 @@ using Fiap.TechChallenge.Contract.v1.Contato.RemoverContato;
 using Fiap.TechChallenge.Foundation.Core.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Prometheus;
 
 namespace Fiap.TechChallenge.Api.Controllers.Contato;
 
@@ -39,6 +41,14 @@ public class ContatoController : ControllerBase
     private readonly IValidator<ObterContatoPorIdQueryRequest> _validatorObterContatoPorIdQueryRequest;
     private readonly IValidator<ObterContatosPorDddQueryRequest> _validatorObterContatosPorDddQueryRequest;
     private readonly IValidator<RemoverContatoCommand> _validatorRemoverContatoCommand;
+
+    private static readonly Gauge MemoryUsageByEndpointGauge = Metrics.CreateGauge(
+        "api_memory_usage_by_endpoint_bytes",
+        "Uso de memória da API por endpoint em bytes",
+        new GaugeConfiguration
+        {
+            LabelNames = new[] { "endpoint" } // Usar 'endpoint' como label para diferenciar os diferentes endpoints
+        });
 
     public ContatoController(ILogger<ContatoController> logger,
         AtualizarContatoCommandHandler atualizarContatoCommandHandler,
@@ -91,14 +101,42 @@ public class ContatoController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> CriarContato([FromBody] CriarContatoCommand command)
     {
+        // Métrica personalizada para latência
+        var timer = Metrics.CreateHistogram(
+            "criar_contato_latency_seconds",
+            "Latência do endpoint CriarContato em segundos")
+            .NewTimer();
+
+        // Métrica personalizada para contagem de status
+        var requestCounter = Metrics.CreateCounter(
+            "criar_contato_requests_total",
+            "Total de requisições ao endpoint CriarContato",
+            new CounterConfiguration
+            {
+                LabelNames = new[] { "status" } // Status HTTP
+            });
+
         try
         {
+            var stopwatch = Stopwatch.StartNew();
+
+            // Atualiza a métrica de uso de memória
+            MemoryUsageByEndpointGauge.WithLabels("CriarContato").Set(Process.GetCurrentProcess().WorkingSet64);
+
             await _validatorCriarContatoCommand.ValidateAndThrowAsync(command);
             var result = await _criarContatoCommandHandler.Handle(command);
+
+            stopwatch.Stop();
+            timer.ObserveDuration(); // Registra o tempo no Prometheus
+            requestCounter.WithLabels("200").Inc(); // Incrementa contador para sucesso
+
             return new OkObjectResult(result);
         }
         catch (Exception e)
         {
+            timer.ObserveDuration(); // Registra o tempo mesmo em caso de erro
+            requestCounter.WithLabels("400").Inc(); // Incrementa contador para erro
+
             _logger.LogError($"Erro interno: {e.Message}", e);
             return new BadRequestObjectResult(new ErrorResponse(e.Message));
         }
