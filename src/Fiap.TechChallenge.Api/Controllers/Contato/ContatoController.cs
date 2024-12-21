@@ -35,8 +35,8 @@ public class ContatoController : ControllerBase
     private readonly ObterContatoPorIdQueryHandler _obterContatoPorIdQueryHandler;
     private readonly ObterContatosPorDddQueryHandler _obterContatosPorDddQueryHandler;
     private readonly RemoverContatoCommandHandler _removerContatoCommandHandler;
-    private readonly IValidator<AtualizarContatoCommand> _validatorAtualizarContatoCommand;
 
+    private readonly IValidator<AtualizarContatoCommand> _validatorAtualizarContatoCommand;
     private readonly IValidator<CriarContatoCommand> _validatorCriarContatoCommand;
     private readonly IValidator<ObterContatoPorIdQueryRequest> _validatorObterContatoPorIdQueryRequest;
     private readonly IValidator<ObterContatosPorDddQueryRequest> _validatorObterContatosPorDddQueryRequest;
@@ -101,27 +101,22 @@ public class ContatoController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> CriarContato([FromBody] CriarContatoCommand command)
     {
+        string histogram = "criar_contato_latency_seconds";
+        string endPoint = "CriarContato";
+        string counterName = "criar_contato_requests_total";
+
         // Métrica personalizada para latência
-        var timer = Metrics.CreateHistogram(
-            "criar_contato_latency_seconds",
-            "Latência do endpoint CriarContato em segundos")
-            .NewTimer();
+        var timer = Metrics.CreateHistogram(histogram, $"Latência do endpoint {endPoint} em segundos").NewTimer();
 
         // Métrica personalizada para contagem de status
-        var requestCounter = Metrics.CreateCounter(
-            "criar_contato_requests_total",
-            "Total de requisições ao endpoint CriarContato",
-            new CounterConfiguration
-            {
-                LabelNames = new[] { "status" } // Status HTTP
-            });
+        var requestCounter = Metrics.CreateCounter(counterName, $"Total de requisições ao endpoint {endPoint}", new CounterConfiguration { LabelNames = new[] { "status" } });
 
         try
         {
             var stopwatch = Stopwatch.StartNew();
 
             // Atualiza a métrica de uso de memória
-            MemoryUsageByEndpointGauge.WithLabels("CriarContato").Set(Process.GetCurrentProcess().WorkingSet64);
+            MemoryUsageByEndpointGauge.WithLabels(endPoint).Set(Process.GetCurrentProcess().WorkingSet64);
 
             await _validatorCriarContatoCommand.ValidateAndThrowAsync(command);
             var result = await _criarContatoCommandHandler.Handle(command);
@@ -174,16 +169,38 @@ public class ContatoController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> AtualizarContato([FromRoute] string id, [FromBody] AtualizarContatoCommand command)
     {
+        string histogram = "atualizar_contato_latency_seconds";
+        string endPoint = "AtualizarContato";
+        string counterName = "atualizar_contato_requests_total";
+
+        // Métrica personalizada para latência
+        var timer = Metrics.CreateHistogram(histogram, $"Latência do endpoint {endPoint} em segundos").NewTimer();
+
+        // Métrica personalizada para contagem de status
+        var requestCounter = Metrics.CreateCounter(counterName, $"Total de requisições ao endpoint {endPoint}", new CounterConfiguration { LabelNames = new[] { "status" } });
+
         try
         {
+            var stopwatch = Stopwatch.StartNew();
+
+            // Atualiza a métrica de uso de memória
+            MemoryUsageByEndpointGauge.WithLabels(endPoint).Set(Process.GetCurrentProcess().WorkingSet64);
+
             command.Id = id; // Vinculando o ID ao comando
             await _validatorAtualizarContatoCommand.ValidateAndThrowAsync(command);
             var result = await _atualizarContatoCommandHandler.Handle(command);
 
+            stopwatch.Stop();
+            timer.ObserveDuration(); // Registra o tempo no Prometheus
+            requestCounter.WithLabels("200").Inc(); // Incrementa contador para sucesso
+                        
             return new OkObjectResult(result);
         }
         catch (Exception e)
         {
+            timer.ObserveDuration(); // Registra o tempo mesmo em caso de erro
+            requestCounter.WithLabels("400").Inc(); // Incrementa contador para erro
+
             _logger.LogError($"Erro interno: {e.Message}", e);
             return new BadRequestObjectResult(new ErrorResponse(e.Message));
         }
@@ -214,20 +231,40 @@ public class ContatoController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> RemoverContato([FromRoute] string id)
     {
+        string histogram = "remover_contato_latency_seconds";
+        string endPoint = "RemoverContato";
+        string counterName = "remover_contato_requests_total";
+
+        // Métrica personalizada para latência
+        var timer = Metrics.CreateHistogram(histogram, $"Latência do endpoint {endPoint} em segundos").NewTimer();
+
+        // Métrica personalizada para contagem de status
+        var requestCounter = Metrics.CreateCounter(counterName, $"Total de requisições ao endpoint {endPoint}", new CounterConfiguration { LabelNames = new[] { "status" } });
+
+
         try
         {
-            var command = new RemoverContatoCommand
-            {
-                Id = id
-            };
+            var stopwatch = Stopwatch.StartNew();
+
+            // Atualiza a métrica de uso de memória
+            MemoryUsageByEndpointGauge.WithLabels(endPoint).Set(Process.GetCurrentProcess().WorkingSet64);
+
+            var command = new RemoverContatoCommand { Id = id };
 
             await _validatorRemoverContatoCommand.ValidateAndThrowAsync(command);
             var result = await _removerContatoCommandHandler.Handle(command);
+
+            stopwatch.Stop();
+            timer.ObserveDuration(); // Registra o tempo no Prometheus
+            requestCounter.WithLabels("200").Inc(); // Incrementa contador para sucesso
 
             return new OkObjectResult(result);
         }
         catch (Exception e)
         {
+            timer.ObserveDuration(); // Registra o tempo mesmo em caso de erro
+            requestCounter.WithLabels("400").Inc(); // Incrementa contador para erro
+
             _logger.LogError($"Erro interno: {e.Message}", e);
             return new BadRequestObjectResult(new ErrorResponse(e.Message));
         }
@@ -260,18 +297,38 @@ public class ContatoController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> ObterContatoPorId([FromRoute] string id)
     {
+        string histogram = "obterPorId_contato_latency_seconds";
+        string endPoint = "ObterPorIdContato";
+        string counterName = "obterPorId_contato_requests_total";
+
+        // Métrica personalizada para latência
+        var timer = Metrics.CreateHistogram(histogram, $"Latência do endpoint {endPoint} em segundos").NewTimer();
+
+        // Métrica personalizada para contagem de status
+        var requestCounter = Metrics.CreateCounter(counterName, $"Total de requisições ao endpoint {endPoint}", new CounterConfiguration { LabelNames = new[] { "status" } });
+
         try
         {
-            var request = new ObterContatoPorIdQueryRequest
-            {
-                Id = id
-            };
+            var stopwatch = Stopwatch.StartNew();
+
+            // Atualiza a métrica de uso de memória
+            MemoryUsageByEndpointGauge.WithLabels(endPoint).Set(Process.GetCurrentProcess().WorkingSet64);
+
+            var request = new ObterContatoPorIdQueryRequest { Id = id };
             await _validatorObterContatoPorIdQueryRequest.ValidateAndThrowAsync(request);
             var result = await _obterContatoPorIdQueryHandler.Handle(request);
+
+            stopwatch.Stop();
+            timer.ObserveDuration(); // Registra o tempo no Prometheus
+            requestCounter.WithLabels("200").Inc(); // Incrementa contador para sucesso
+
             return new OkObjectResult(result);
         }
         catch (Exception e)
         {
+            timer.ObserveDuration(); // Registra o tempo mesmo em caso de erro
+            requestCounter.WithLabels("400").Inc(); // Incrementa contador para erro
+
             _logger.LogError($"Erro interno: {e.Message}", e);
             return new BadRequestObjectResult(new ErrorResponse(e.Message));
         }
@@ -305,18 +362,38 @@ public class ContatoController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> ObterContatosPorDdd([FromRoute] int ddd)
     {
+        string histogram = "obterPorDDD_contato_latency_seconds";
+        string endPoint = "ObterPorDDDContato";
+        string counterName = "obterPorDDD_contato_requests_total";
+
+        // Métrica personalizada para latência
+        var timer = Metrics.CreateHistogram(histogram, $"Latência do endpoint {endPoint} em segundos").NewTimer();
+
+        // Métrica personalizada para contagem de status
+        var requestCounter = Metrics.CreateCounter(counterName, $"Total de requisições ao endpoint {endPoint}", new CounterConfiguration { LabelNames = new[] { "status" } });
+
         try
         {
-            var request = new ObterContatosPorDddQueryRequest
-            {
-                Ddd = ddd
-            };
+            var stopwatch = Stopwatch.StartNew();
+
+            // Atualiza a métrica de uso de memória
+            MemoryUsageByEndpointGauge.WithLabels(endPoint).Set(Process.GetCurrentProcess().WorkingSet64);
+
+            var request = new ObterContatosPorDddQueryRequest { Ddd = ddd };
             await _validatorObterContatosPorDddQueryRequest.ValidateAndThrowAsync(request);
             var result = await _obterContatosPorDddQueryHandler.Handle(request);
+
+            stopwatch.Stop();
+            timer.ObserveDuration(); // Registra o tempo no Prometheus
+            requestCounter.WithLabels("200").Inc(); // Incrementa contador para sucesso
+
             return new OkObjectResult(result);
         }
         catch (Exception e)
         {
+            timer.ObserveDuration(); // Registra o tempo mesmo em caso de erro
+            requestCounter.WithLabels("400").Inc(); // Incrementa contador para erro
+
             _logger.LogError($"Erro interno: {e.Message}", e);
             return new BadRequestObjectResult(new ErrorResponse(e.Message));
         }
