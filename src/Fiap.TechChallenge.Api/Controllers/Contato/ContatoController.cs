@@ -50,6 +50,7 @@ public class ContatoController : ControllerBase
             LabelNames = new[] { "endpoint" } // Usar 'endpoint' como label para diferenciar os diferentes endpoints
         });
 
+
     public ContatoController(ILogger<ContatoController> logger,
         AtualizarContatoCommandHandler atualizarContatoCommandHandler,
         CriarContatoCommandHandler criarContatoCommandHandler,
