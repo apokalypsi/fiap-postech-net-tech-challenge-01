@@ -222,7 +222,7 @@ public class ContatoController : ControllerBase
     ///     Retorna um status de sucesso (200 OK) se o contato for removido com êxito.
     ///     Caso contrário, retorna um erro (400 BadRequest) caso o contato não seja encontrado.
     /// </returns>
-    /// <response code="200">Contato removido com sucesso.</response>
+    /// <response code="200">Contato removido  com sucesso.</response>
     /// <response code="400">
     ///     Erro nos dados fornecidos ou o contato não foi encontrado. Retorna um <see cref="ErrorResponse" />
     ///     .
