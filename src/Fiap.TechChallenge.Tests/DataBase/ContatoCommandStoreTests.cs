@@ -65,7 +65,7 @@ public class ContatoCommandStoreTests
         // Assert
         Assert.Equal(contato, result);
 
-        // Verifica se o contato foi realmente adicionado no banco
+        // Verifica se o contato foi realmente adicionado no bancoo
         var contatoNoBanco = await _context.Contatos.FindAsync(contato.Id);
         Assert.NotNull(contatoNoBanco);
         Assert.Equal(contato.Nome, contatoNoBanco.Nome);
