@@ -18,7 +18,7 @@ public class ObterContatoPorIdQueryValidatorTests
         // Arrange
         var request = new ObterContatoPorIdQueryRequest
         {
-            Id = Guid.NewGuid().ToString() // GUID válido
+            Id = Guid.NewGuid().ToString() // GUID válidoo
         };
 
         // Act
