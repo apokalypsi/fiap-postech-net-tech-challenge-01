@@ -97,7 +97,7 @@ public class CriarContatoCommandValidatorTests
     public void Deve_Passar_Quando_Telefone_For_Valido()
     {
         // Arrange
-        var command = new CriarContatoCommand { Telefone = "123456789" }; // Telefone válido
+        var command = new CriarContatoCommand { Telefone = "123456789" }; // Telefone válidoo
 
         // Act
         var result = _validator.TestValidate(command);
