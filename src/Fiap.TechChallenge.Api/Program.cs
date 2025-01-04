@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,13 @@ builder.Services.AddValidatorsFromAssemblyContaining<ObterContatoPorIdQueryReque
 builder.Services.AddValidatorsFromAssemblyContaining<ObterContatosPorDddQueryRequest>();
 
 var app = builder.Build();
+
+// Adiciona o middleware do Prometheus
+app.UseHttpMetrics(); // Coleta métricas HTTP padrão (inclui latência, contadores, etc.)
+
+// Endpoint para expor métricas do Prometheus
+app.MapMetrics();
+
 
 // Garantir que o banco de dados e as tabelas sejam criados se ainda não existirem
 using (var scope = app.Services.CreateScope())
